@@ -1,0 +1,19 @@
+{
+  "name": "hobbinator-backend",
+  "version": "1.0.0",
+  "description": "Backend for hobbinative",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manish-rajpurohitt/hobbinative-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/manish-rajpurohitt/hobbinative-backend/issues"
+  },
+  "homepage": "https://github.com/manish-rajpurohitt/hobbinative-backend#readme"
+}
