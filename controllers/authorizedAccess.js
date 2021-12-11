@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const HobbyUserMapper = require("../models/HobbyUserMapper");
-
+const listOfHobbies = require("../models/listHobbies");
+const UserLocationMapper = require("../models/UserLocationMapper");
 
 
 exports.updateProfile = async (req, res, next) =>{
@@ -67,6 +68,55 @@ exports.updateHobby = async (req, res, next) => {
     catch(e){
         next(e);
 
+    }
+}
+
+exports.getAllHobbies = async (req, res, next) => {
+    try{
+
+        let hobbyList = await listOfHobbies.find({});
+        res.status(200).json(hobbyList);
+    }
+    catch(e){
+        next(e);
+    }
+}
+
+exports.getUserById = async (req, res, next) => {
+    try{
+        let id = req.params.userId;
+        let user = await User.findOne({_id:id});
+        res.status(200).json(user);
+    }
+    catch(e){
+        next(e);
+    }
+}
+
+exports.getUsersListByHobbyAndLocation = async (req, res, next) => {
+    let listOfHobbies = req.user.listOfHobbies;
+    let userLocation = req.user.locationCity;
+    try{
+        let locationMatchedUsers = [];
+        await UserLocationMapper.findOne({locationCity:userLocation}).then(async result=>{
+            locationMatchedUsers = result.listOfUsers;
+        }).then(async ()=>{
+            let userList = [];
+            for(let i=0;i<listOfHobbies.length; i++){
+                let hobbyUser = await HobbyUserMapper.findOne({hobbyId:listOfHobbies[i].hobbyId});
+                userList.push(...hobbyUser.listOfUsers);
+            }
+            userList = userList.filter(e => e !== req.user._id.toString());
+            userList = [...new Set(userList)];
+            const filteredArray = userList.filter(value => locationMatchedUsers.includes(value));
+            res.status(200).json({
+                success: true,
+                listOfUsers: filteredArray
+            });
+        });
+    }
+    catch(e){
+        next(e)
     }
 }
 

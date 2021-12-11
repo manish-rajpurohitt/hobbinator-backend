@@ -15,7 +15,14 @@ exports.register = async (req, res, next) => {
         const user = await User.create({
             email, password, firstName, lastName, addedOn, displayName, phoneNumber, coOrds, locationCity, listOfHobbies
         });
-        let userLocationMap = await UserLocationMapper.find({locationCity: locationCity});
+        let userLocationMap = await UserLocationMapper.findOne({locationCity: locationCity});
+        if(userLocationMap === null)
+            userLocationMap = await UserLocationMapper.create({locationCity:locationCity, listOfUsers:[]});
+
+        userLocationMap.listOfUsers.push(user._id.toString());
+        await UserLocationMapper.update({locationCity: locationCity}, {
+            $set : {"listOfUsers": userLocationMap.listOfUsers}
+        });
         sendToken(user, 201, res);
     }
     catch(e){
@@ -36,7 +43,7 @@ exports.login = async (req, res, next) => {
 
         if(!isMatched)
             return next(new ErrorResponse("Invalid credentials", 401))
-
+            
        sendToken(user, 200, res);
 
     }
