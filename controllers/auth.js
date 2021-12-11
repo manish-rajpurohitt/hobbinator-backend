@@ -43,7 +43,7 @@ exports.login = async (req, res, next) => {
 
         if(!isMatched)
             return next(new ErrorResponse("Invalid credentials", 401))
-            
+
        sendToken(user, 200, res);
 
     }
@@ -66,9 +66,9 @@ exports.forgotpassword = async (req, res, next) => {
         const resetToken = user.getResetPasswordToken();
         await user.save();
         console.log(user);
-        const resetUrl = `http://${process.env.BASE_URL}/api/auth/passwordReset/${resetToken}`;
+        const resetUrl = `https://${process.env.BASE_URL}/resetPassword/${resetToken}`;
         const message = `
-        <h1>Password Reser</h1>
+        <h1>Password Reset</h1>
         <p>You have requested to reset your password. please click here to reset your password :</p>
         <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
         `;
