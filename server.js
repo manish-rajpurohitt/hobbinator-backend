@@ -31,7 +31,12 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 // parse application/json
 app.use(bodyParser.json())
-
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  next();
+});
 app.use('/api/auth',jsonParser, require('./routes/auth'));
 app.use('/api/user',jsonParser, require("./routes/authorizedAccess"));
 app.use('/api/setUpHobbylist', require("./routes/setupHobbyList"));
