@@ -109,9 +109,15 @@ exports.getUsersListByHobbyAndLocation = async (req, res, next) => {
             userList = userList.filter(e => e !== req.user._id.toString());
             userList = [...new Set(userList)];
             const filteredArray = userList.filter(value => locationMatchedUsers.includes(value));
+            filteredUsers = [];
+            for(let i=0;i<filteredArray.length;i++){
+                let user = await User.findOne({_id:filteredArray[i]});
+                    filteredUsers.push(user);
+            }
+
             res.status(200).json({
                 success: true,
-                listOfUsers: filteredArray
+                listOfUsers: filteredUsers
             });
         });
     }

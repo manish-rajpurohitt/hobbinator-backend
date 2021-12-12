@@ -5,25 +5,37 @@ const sendEmail = require('../utils/sendEmail');
 const ErrorResponse = require('../utils/errorResponse');
 const crypto = require("crypto");
 const UserLocationMapper = require("../models/UserLocationMapper");
+const axios = require('axios');
+
+
 
 
 exports.register = async (req, res, next) => {
-    const {email, password, firstName, lastName, phoneNumber, coOrds, locationCity, listOfHobbies} = req.body;
+    
     try{
         const addedOn = Date.now();
-        const displayName = firstName +" "+ lastName;
-        const user = await User.create({
-            email, password, firstName, lastName, addedOn, displayName, phoneNumber, coOrds, locationCity, listOfHobbies
+        const displayName = req.body.firstName +" "+ req.body.lastName;
+        let locationCity = "";
+        await axios.get(`https://api.postalpincode.in/pincode/${req.body.locationCity}`)
+        .then(response => {
+            locationCity = response.data[0].PostOffice[0].District;
+        })
+        .catch(error => {
+            next(error);
         });
+        const user = await User.create({...req.body,displayName, locationCity});
+        console.log(user);
+
         let userLocationMap = await UserLocationMapper.findOne({locationCity: locationCity});
         if(userLocationMap === null)
             userLocationMap = await UserLocationMapper.create({locationCity:locationCity, listOfUsers:[]});
 
         userLocationMap.listOfUsers.push(user._id.toString());
-        await UserLocationMapper.update({locationCity: locationCity}, {
+        await UserLocationMapper.update({locationCity:locationCity}, {
             $set : {"listOfUsers": userLocationMap.listOfUsers}
         });
         sendToken(user, 201, res);
+        return
     }
     catch(e){
         next(e);
@@ -44,7 +56,13 @@ exports.login = async (req, res, next) => {
         if(!isMatched)
             return next(new ErrorResponse("Invalid credentials", 401))
 
-       sendToken(user, 200, res);
+            const token = user.getSignedToken();
+            user.password = "";
+            res.status(200).json({
+                success: true,
+                token,
+                user
+            })
 
     }
     catch(e){
@@ -65,7 +83,6 @@ exports.forgotpassword = async (req, res, next) => {
             console.log(user);
         const resetToken = user.getResetPasswordToken();
         await user.save();
-        console.log(user);
         const resetUrl = `https://${process.env.BASE_URL}/resetPassword/${resetToken}`;
         const message = `
         <h1>Password Reset</h1>

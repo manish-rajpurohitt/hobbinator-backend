@@ -2,18 +2,19 @@ const nodemailer = require('nodemailer');
 
 const sendEmail = (options) =>{
     const transpoter = nodemailer.createTransport({
-        service : process.env.EMAIL_SERVICE,
-        auth:{
-            user: process.env.EMAIL_USERNAME,
-            pass: process.env.EMAIL_PASS
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
         }
-    })
+      })
 
     const mailOptions = {
         from: process.env.EMAIL_FROM,
         to: options.to,
         subject: options.subject,
-        html: options.text
+        text: options.text
     }
 
     transpoter.sendMail(mailOptions, function(err, info){
